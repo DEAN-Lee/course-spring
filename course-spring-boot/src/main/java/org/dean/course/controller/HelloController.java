@@ -1,7 +1,7 @@
 package org.dean.course.controller;
 
 
-import org.dean.course.sevice.StrategyContext;
+import org.dean.course.sevice.strategy.StrategyContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

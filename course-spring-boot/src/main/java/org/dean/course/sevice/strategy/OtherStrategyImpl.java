@@ -1,4 +1,4 @@
-package org.dean.course.sevice;
+package org.dean.course.sevice.strategy;
 
 import org.springframework.stereotype.Service;
 

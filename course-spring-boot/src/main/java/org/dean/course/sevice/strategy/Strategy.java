@@ -1,4 +1,4 @@
-package org.dean.course.sevice;
+package org.dean.course.sevice.strategy;
 
 /**
  * @author Dean github:https://github.com/DEAN-Lee

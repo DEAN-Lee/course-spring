@@ -22,7 +22,7 @@ public class Publisher implements ApplicationContextAware {
     }
 
     public void publishMyApplicationEvent(Float price) {
-        /*以String 对象作为事件源 price*/
+        /*以price 对象作为事件源*/
         /*这就是要实现ApplicationContextAware 接口的原因，因为需要当前应用的ApplicationContext 对象*/
         MyGoldFuturesEvent event = new MyGoldFuturesEvent(price);
         /*使用ApplicationContext 对象的publishEvent 方法发布事件*/

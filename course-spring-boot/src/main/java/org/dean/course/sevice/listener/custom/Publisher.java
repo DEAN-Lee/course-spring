@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * 发布消息类
+ *
  */
 @Service
 public class Publisher implements ApplicationContextAware {

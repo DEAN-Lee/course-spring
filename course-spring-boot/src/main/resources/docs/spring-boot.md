@@ -12,6 +12,7 @@
     * 设置项目启动类型：none、servlet、reactive
     * 获取SpringContextInitializer 使用SpringFactoriesLoader 加载springboot下自动配置文件META-INF/spring.factories 默认配置初始类
     * 获取ApplicationListener  使用SpringFactoriesLoader 加载springboot下自动配置文件META-INF/spring.factories 默认配置的监听类
+    * 设置启动时间监听、开启监听
     
     
     

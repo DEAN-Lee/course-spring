@@ -10,9 +10,13 @@
     * 设置资源加载器
     * 设置主资源加载
     * 设置项目启动类型：none、servlet、reactive
-    * 获取SpringContextInitializer 使用SpringFactoriesLoader 加载springboot下自动配置文件META-INF/spring.factories 默认配置初始类
-    * 获取ApplicationListener  使用SpringFactoriesLoader 加载springboot下自动配置文件META-INF/spring.factories 默认配置的监听类
+    * 获取SpringContextInitializer 使用SpringFactoriesLoader 加载springboot多个配置下自动配置文件META-INF/spring.factories 默认配置初始类
+    * 获取ApplicationListener  使用SpringFactoriesLoader 加载springboot多个配置下自动配置文件META-INF/spring.factories 默认配置的监听类
     * 设置启动时间监听、开启监听
+    * 设置SpringApplicationRunListeners 监听
+    * 发布SpringApplicationRunListeners 通知其他监听类
+    * 设置默认启动参数applicationArguments
+    
     
     
     

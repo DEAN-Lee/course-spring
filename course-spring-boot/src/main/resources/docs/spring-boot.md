@@ -17,7 +17,11 @@
     * 发布SpringApplicationRunListeners 通知其他监听类
     * 设置默认启动参数applicationArguments
     * 设置条件环境变量信息prepareEnvironment 去除忽略配合
-    * 创建SpringContext 根据配置信息
+    * 创建ApplicationContext的子类AnnotationConfigServletWebServerApplicationContext
+    * 获取自动装配的异常收集报告
+    * 预处理ApplicationContext
+    
+    
     
     
     

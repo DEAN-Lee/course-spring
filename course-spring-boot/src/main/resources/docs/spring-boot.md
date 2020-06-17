@@ -24,7 +24,13 @@
 * 加载完成ApplicationContext 回调
 * StopWatch停止监听
 * 启动事件监听
-* 
+
+## 自动装配
+* SpringFactoriesLoader 加载过个META-INF/spring.factories
+
+
+
+
 
 
     

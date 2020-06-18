@@ -26,7 +26,13 @@
 * 启动事件监听
 
 ## 自动装配
-* SpringFactoriesLoader 加载过个META-INF/spring.factories
+### 底层技术
+* Spring 模式注解装配
+* Spring @Enable 模块装配
+* Spring 条件装配
+* Spring 工厂加载机制
+* 实现类： SpringFactoriesLoader
+* 配置资源： META-INF/spring.factories
 
 
 

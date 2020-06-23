@@ -30,6 +30,7 @@
 * @SpringBootConfiguration->@Configuration->@Component spring组件
 * @EnableAutoConfiguration->Import
 * @EnableAutoConfiguration->Import
+
 ### 底层技术
 * Spring 模式注解装配
 * Spring @Enable 模块装配

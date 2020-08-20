@@ -26,6 +26,11 @@
 * 启动事件监听
 
 ## 自动装配
+* 从注解开始@SpringBootApplication
+* @SpringBootConfiguration->@Configuration->@Component spring组件
+* @EnableAutoConfiguration->Import
+* @EnableAutoConfiguration->Import
+
 ### 底层技术
 * Spring 模式注解装配
 * Spring @Enable 模块装配
@@ -33,6 +38,10 @@
 * Spring 工厂加载机制
 * 实现类： SpringFactoriesLoader
 * 配置资源： META-INF/spring.factories
+
+
+
+
 
 
 

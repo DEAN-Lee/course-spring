@@ -40,8 +40,15 @@ ApplicationContext context = new ClassPathXmlApplicationContext("services.xml", 
 ```
 ## 使用容器
 ApplicationContext是一个高级工厂的接口，该工厂能够维护不同bean及其依赖项的注册表。可以使用T getBean(String name, Class<T> requiredType)
-获取使用的bean对象。
+获取使用的bean对象。通常项目中也很少会直接使用getBean方法，一般直接在配置元数据配置了相关依赖。
 ```
-
+   // create and configure beans
+    ApplicationContext context = new ClassPathXmlApplicationContext("conf/services.xml", "conf/daos.xml");
+    
+    // retrieve configured instance
+    UserService service = context.getBean("userService", UserService.class);
+    
+    // use configured instance
+    service.getAccountDao().printUserList();
 ```
 

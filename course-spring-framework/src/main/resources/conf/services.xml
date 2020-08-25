@@ -6,12 +6,20 @@
 
     <!-- services -->
 
-    <bean id="userService" class="org.dean.course.framework.container.UserService">
+    <bean id="userService" class="org.dean.course.framework.container.UserServiceSetDI">
         <property name="accountDao" ref="accountDao"/>
         <property name="userInfoDao" ref="userInfoDao"/>
         <!-- additional collaborators and configuration for this bean go here -->
     </bean>
+    <alias name="userService" alias="userService2"></alias>
 
     <!-- more bean definitions for services go here -->
+
+    <bean id="userServiceConstructorDIDemo" class="org.dean.course.framework.container.UserServiceConstructorDIDemo">
+
+        <!-- additional collaborators and configuration for this bean go here -->
+        <constructor-arg index="0" ref="userInfoDao"/>
+        <constructor-arg index="1" ref="accountDao"/>
+    </bean>
 
 </beans>

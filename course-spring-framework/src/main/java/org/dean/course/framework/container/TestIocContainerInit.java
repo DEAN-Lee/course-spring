@@ -9,10 +9,14 @@ public class TestIocContainerInit {
         ApplicationContext context = new ClassPathXmlApplicationContext("conf/services.xml", "conf/daos.xml");
 
         // retrieve configured instance
-        UserService service = context.getBean("userService", UserService.class);
+        UserServiceSetDI service = context.getBean("userService", UserServiceSetDI.class);
+        UserServiceSetDI userService2 = context.getBean("userService2", UserServiceSetDI.class);
+        UserServiceConstructorDIDemo constructorDIDemo = context.getBean("userServiceConstructorDIDemo", UserServiceConstructorDIDemo.class);
 
         // use configured instance
         service.getAccountDao().printUserList();
+        userService2.getAccountDao().printUserList();
+        constructorDIDemo.getAccountDao().printUserList();
 
     }
 }

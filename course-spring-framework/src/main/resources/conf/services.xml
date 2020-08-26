@@ -6,7 +6,7 @@
 
     <!-- services -->
 
-    <bean id="userService" class="org.dean.course.framework.container.UserServiceSetDI">
+    <bean id="userService" class="org.dean.course.framework.container.UserServiceSetDI" autowire="default">
         <property name="accountDao" ref="accountDao"/>
         <property name="userInfoDao" ref="userInfoDao"/>
         <!-- additional collaborators and configuration for this bean go here -->

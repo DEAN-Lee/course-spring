@@ -20,4 +20,8 @@ public class UserServiceSetDI {
     public void setAccountDao(AccountDao accountDao) {
         this.accountDao = accountDao;
     }
+
+    public UserServiceSetDI() {
+        System.out.println("UserServiceSetDI init");
+    }
 }

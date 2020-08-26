@@ -7,6 +7,7 @@ public class UserServiceConstructorDIDemo {
     public UserServiceConstructorDIDemo(UserInfoDao userInfoDao, AccountDao accountDao) {
         this.userInfoDao = userInfoDao;
         this.accountDao = accountDao;
+        System.out.println("UserServiceConstructorDIDemo init");
     }
 
     public UserInfoDao getUserInfoDao() {
@@ -17,4 +18,7 @@ public class UserServiceConstructorDIDemo {
         return accountDao;
     }
 
+    public UserServiceConstructorDIDemo() {
+        System.out.println("UserServiceConstructorDIDemo init");
+    }
 }

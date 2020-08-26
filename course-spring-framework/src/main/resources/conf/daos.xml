@@ -4,12 +4,16 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         https://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="accountDao" name="accountDao"
+    <bean id="accountDao"
           class="org.dean.course.framework.container.AccountDao">
         <!-- additional collaborators and configuration for this bean go here -->
     </bean>
 
-    <bean id="userInfoDao" name="userInfoDao" class="org.dean.course.framework.container.UserInfoDao">
+    <bean id="userInfoDao" class="org.dean.course.framework.container.UserInfoDao">
+        <!-- additional collaborators and configuration for this bean go here -->
+    </bean>
+
+    <bean id="userInfoLazyInitDao" class="org.dean.course.framework.container.UserInfoLazyInitDao" lazy-init="true">
         <!-- additional collaborators and configuration for this bean go here -->
     </bean>
 

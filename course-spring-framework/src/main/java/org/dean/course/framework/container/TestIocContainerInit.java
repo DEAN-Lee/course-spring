@@ -18,5 +18,7 @@ public class TestIocContainerInit {
         userService2.getAccountDao().printUserList();
         constructorDIDemo.getAccountDao().printUserList();
 
+        //lazy
+        UserInfoLazyInitDao userInfoLazyInitDao = context.getBean("userInfoLazyInitDao", UserInfoLazyInitDao.class);
     }
 }

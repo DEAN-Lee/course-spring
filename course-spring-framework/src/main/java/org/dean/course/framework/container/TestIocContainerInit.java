@@ -25,7 +25,7 @@ public class TestIocContainerInit {
         UserInfoLazyInitDao userInfoLazyInitDao = context.getBean("userInfoLazyInitDao", UserInfoLazyInitDao.class);
 
         initializingBeanDao.printUserList();
-        System.out.println(" context.refresh();*******************");
+        System.out.println(" context.refresh()*******************");
         context.refresh();
 
     }

@@ -19,4 +19,12 @@
 
     <!-- more bean definitions for data access objects go here -->
 
+
+    <bean id="accountInitConfigDao" class="org.dean.course.framework.container.AccountInitConfigDao" init-method="init">
+        <!-- additional collaborators and configuration for this bean go here -->
+    </bean>
+
+    <bean id="accountInitializingBeanDao" class="org.dean.course.framework.container.AccountInitializingBeanDao" init-method="init">
+        <!-- additional collaborators and configuration for this bean go here -->
+    </bean>
 </beans>

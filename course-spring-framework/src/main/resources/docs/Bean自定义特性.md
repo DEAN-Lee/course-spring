@@ -215,7 +215,6 @@ SmartLifecycle定义的stop方法接受回调。任何实现都必须在实现�
 这时，默认的生命周期处理器会检查每个SmartLifecycle对象的isAutoStartup()方法返回的布尔值。如果为真，则在该点启动该对象，
 而不是等待上下文或其自己的start()方法的显式调用(与上下文刷新不同，对于标准上下文实现，上下文启动不会自动发生)。如上所述，相位值和任何“依赖”关系决定启动顺序。
 
-
 Spring的IoC容器关闭优雅地在非web应用程序中
 ---
 本节仅适用于非web应用程序。基于web的Spring ApplicationContext实现已经准备好了代码，可以在相关的web应用程序关闭时优雅地关闭Spring IoC容器
@@ -241,3 +240,11 @@ public final class Boot {
 ```
   
 ## ApplicationContextAware 和 BeanNameAware
+当ApplicationContext创建一个实现org.springframework.context.ApplicationContextAware接口的对象时，该实例通过对ApplicationContext的提供设置。
+ApplicationContextAware 接口信息
+```
+public interface ApplicationContextAware {
+
+    void setApplicationContext(ApplicationContext applicationContext) throws BeansException;
+}
+```

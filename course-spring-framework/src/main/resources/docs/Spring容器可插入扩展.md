@@ -1,0 +1,15 @@
+# Spring容器可插入扩展
+通常，应用程序开发人员不需要子类化ApplicationContext实现类。相反，可以通过插入特殊集成接口的实现来扩展Spring IoC容器。接下来的几节将描述这些集成接口。
+## 通过使用BeanPostProcessor定制bean
+BeanPostProcessor接口定义了回调方法，您可以实现这些方法来提供您自己的(或覆盖容器默认值)实例化逻辑、依赖项解析逻辑等等。
+如果您想在Spring容器完成实例化、配置和初始化bean之后实现一些自定义逻辑，您可以插入一个或多个自定义BeanPostProcessor实现。
+
+您可以配置多个BeanPostProcessor实例，并且可以通过设置order属性来控制这些BeanPostProcessor实例运行的顺序。
+只有当BeanPostProcessor实现了有序接口时，才能设置此属性。如果您编写自己的BeanPostProcessor，也应该考虑实现Ordered接口。
+有关详细信息，请参阅BeanPostProcessor和有序接口的javadoc。请参见BeanPostProcessor实例的编程注册说明。
+> BeanPostProcessor实例操作bean(或对象)实例。也就是说，Spring IoC容器实例化一个bean实例，然后BeanPostProcessor实例执行它们的工作
+>
+>BeanPostProcessor实例的作用域为每个容器。只有当您使用容器层次结构时，这才是相关的。如果在一个容器中定义BeanPostProcessor，
+>那么它只对该容器中的bean进行后处理。换句话说，在一个容器中定义的bean不会被另一个容器中定义的BeanPostProcessor进行后处理，即使这两个容器属于同一层次结构。
+>
+>要更改实际的bean定义(即定义bean的蓝图)，您需要使用BeanFactoryPostProcessor，正如在使用BeanFactoryPostProcessor自定义配置元数据中所描述的那样。

@@ -248,3 +248,40 @@ public interface ApplicationContextAware {
     void setApplicationContext(ApplicationContext applicationContext) throws BeansException;
 }
 ```
+因此，bean可以通过ApplicationContext接口或通过将引用转换为该接口的已知子类(比如ConfigurableApplicationContext，它公开了其他功能)，
+以编程方式操作创建它们的ApplicationContext。另一种用途，是对其他bean进行编程检索。有时这个功能是有用的。但是，通常应该避免使用它，因为它将代码与Spring结合在一起，
+并且不遵循控制反转风格，在这种风格中协作者作为属性提供给bean。ApplicationContext的其他方法提供了对文件资源的访问、发布应用程序事件和访问消息源。
+
+自动装配是获得对ApplicationContext的引用的另一种选择。传统的构造函数和byType自动装配模式(如在自动装配协作器中所描述的)可以分别为构造函数参数或setter方法参数提供类型ApplicationContext的依赖关系。
+为了获得更大的灵活性，包括自动装配字段和多个参数方法的能力，可以使用基于注解的自动装配特性。如果你这样做了，ApplicationContext就会自动生成一个字段、构造函数参数或方法参数，
+如果有问题的字段、构造函数或方法带有@Autowired注解，那么这些参数期望得到ApplicationContext类型。
+
+当ApplicationContext创建一个实现org.springframework.beans.factory.BeanNameAware接口的类，为类提供对其关联对象定义中定义的名称的引用。下面的清单显示了BeanNameAware接口的定义
+```
+public interface BeanNameAware {
+
+    void setBeanName(String name) throws BeansException;
+}
+```
+在填充普通bean属性之后，但在初始化回调(如InitializingBean、afterPropertiesSet或自定义初始化方法)之前调用回调。
+
+##  其他发现接口
+除了applicationcontextAware和BeanNameAware之外，Spring还提供了广泛的可发现回调接口，让bean向容器表明它们需要某种基础设施依赖关系。
+作为一般规则，名称表示依赖类型。下表总结了最重要的感知接口。
+
+| 名称 | 描述 | 
+| :----:  | :----: | 
+| ApplicationContextAware | Declaring ApplicationContext  | 
+| ApplicationEventPublisherAware | Event publisher of the enclosing ApplicationContext. | 
+| BeanClassLoaderAware | BeanClassLoaderAware | 
+| BeanFactoryAware | 	Declaring BeanFactory. | 
+| BeanNameAware | 	Name of the declaring bean. | 
+| BootstrapContextAware | Resource adapter BootstrapContext the container runs in. Typically available only in JCA-aware ApplicationContext instances. | 
+| LoadTimeWeaverAware |	Defined weaver for processing class definition at load time.| 
+| MessageSourceAware | Configured strategy for resolving messages (with support for parametrization and internationalization). | 
+| NotificationPublisherAware | Spring JMX notification publisher. | 
+| ResourceLoaderAware |  Configured loader for low-level access to resources. | 
+| ServletConfigAware |	Current ServletConfig the container runs in. Valid only in a web-aware Spring ApplicationContext. | 
+| ServletContextAware |  ServletContextAware | 
+
+请再次注意，使用这些接口将您的代码绑定到Spring API，并且不遵循控制反转样式。因此，我们建议将它们用于需要对容器进行编程访问的基础设施bean。

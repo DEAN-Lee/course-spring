@@ -17,7 +17,7 @@ public class TestIocContainerInit {
         UserServiceSetDI service = context.getBean("userService", UserServiceSetDI.class);
         UserServiceSetDI userService2 = context.getBean("userService2", UserServiceSetDI.class);
         UserServiceConstructorDIDemo constructorDIDemo = context.getBean("userServiceConstructorDIDemo", UserServiceConstructorDIDemo.class);
-        AccountInitializingBeanDao initializingBeanDao = context.getBean("accountInitializingBeanDao", AccountInitializingBeanDao.class);
+        AccountInitializingBeanDao initializingBeanDao = context.getBean("initializingBeanDao", AccountInitializingBeanDao.class);
 
         // use configured instance
         service.getAccountDao().printUserList();

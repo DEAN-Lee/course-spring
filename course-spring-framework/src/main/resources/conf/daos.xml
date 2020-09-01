@@ -24,7 +24,7 @@
         <!-- additional collaborators and configuration for this bean go here -->
     </bean>
 
-    <bean id="accountInitializingBeanDao" class="org.dean.course.framework.container.AccountInitializingBeanDao" init-method="init">
+    <bean id="accountInitializingBeanDao" name="initializingBeanDao" class="org.dean.course.framework.container.AccountInitializingBeanDao" init-method="init">
         <!-- additional collaborators and configuration for this bean go here -->
     </bean>
 </beans>

@@ -13,3 +13,35 @@ BeanPostProcessor接口定义了回调方法，您可以实现这些方法来提
 >那么它只对该容器中的bean进行后处理。换句话说，在一个容器中定义的bean不会被另一个容器中定义的BeanPostProcessor进行后处理，即使这两个容器属于同一层次结构。
 >
 >要更改实际的bean定义(即定义bean的蓝图)，您需要使用BeanFactoryPostProcessor，正如在使用BeanFactoryPostProcessor自定义配置元数据中所描述的那样。
+
+org.springframework.beans.factory.config.BeanPostProcessor接口恰好由两个回调方法组成。当这样一个类在容器中注册为后处理器,
+容器每创建bean实例,在调用容器初始化方法(例如InitializingBean.afterPropertiesSet()或任何声明的init方法)之前和在任何bean初始化回调之后，后处理器都会从容器获得一个回调。
+后处理器可以对bean实例采取任何操作，包括完全忽略回调。bean后处理器通常检查回调接口，或者用代理包装bean。为了提供代理包装逻辑，一些Spring AOP基础实现类实现方式为beanPostProcessor。
+
+ApplicationContext自动检测在实现BeanPostProcessor接口的配置元数据中定义的任何bean。ApplicationContext将这些bean注册为后处理器，
+以便稍后在bean创建时调用它们。Bean后处理器可以与其他Bean相同的方式部署在容器中。
+
+注意，当通过在配置类上使用@Bean工厂方法声明BeanPostProcessor时，工厂方法的返回类型应该是实现类本身，
+或者至少是org.springframework.bean .factory.config.BeanPostProcessor接口，清楚地表明该bean的后处理器特性。否则，ApplicationContext不能在完全创建它之前按类型自动检测它。
+由于BeanPostProcessor需要尽早实例化，以便应用于上下文中其他bean的初始化，因此这种早期类型检测非常关键。
+
+> #### 以编程方式注册BeanPostProcessor实例
+>虽然推荐的BeanPostProcessor注册方法是通过ApplicationContext自动检测(如前所述)，但是您可以通过使用addBeanPostProcessor方法通过编程方式针对ConfigurableBeanFactory注册它们。
+>当您需要在注册前计算条件逻辑时，或者甚至在跨层次结构中的上下文复制bean post处理器时，这可能非常有用。
+>但是请注意，以编程方式添加的BeanPostProcessor实例不遵循Ordered接口。在这里，注册的顺序决定了执行的顺序。
+>还要注意，无论任何显式排序如何，编程注册的BeanPostProcessor实例总是在通过自动检测注册的实例之前处理。
+
+> #### 	BeanPostProcessor实例和AOP自动代理
+> 实现BeanPostProcessor接口的类是特殊的，容器会以不同的方式处理它们。作为ApplicationContext特殊启动阶段的一部分，
+> 所有BeanPostProcessor实例和它们直接引用的bean都在启动时实例化。
+>接下来，以排序的方式注册所有BeanPostProcessor实例，并应用于容器中进一步的所有bean。
+>因为AOP自动代理是作为BeanPostProcessor本身实现的，所以无论是BeanPostProcessor实例还是它们直接引用的bean都不适合自动代理，因此，它们没有将方面编织到其中。
+>
+>对于任何这样的bean，您都应该看到一个信息日志消息
+>Bean someBean is not eligible for getting processed by all BeanPostProcessor interfaces (for example: not eligible for auto-proxying)
+>
+>如果您使用自动装配将bean连接到BeanPostProcessor或者@Resource(可能会回到自动装配)，Spring可能会在搜索类型匹配依赖项候选时访问意外的bean，因此，使它们不符合自动代理或其他类型的bean后处理的条件。
+>例如，如果您有一个注释为@Resource的依赖项，其中字段或setter名称并不直接对应于bean的声明名称，并且没有使用name属性，那么Spring将访问其他bean以按类型匹配它们。
+>
+
+下面的示例展示了如何在ApplicationContext中编写、注册和使用BeanPostProcessor实例。

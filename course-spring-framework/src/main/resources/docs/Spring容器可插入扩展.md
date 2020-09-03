@@ -45,3 +45,6 @@ ApplicationContext自动检测在实现BeanPostProcessor接口的配置元数据
 >
 
 下面的示例展示了如何在ApplicationContext中编写、注册和使用BeanPostProcessor实例。
+
+## BeanPostProcessor-style
+

@@ -22,4 +22,6 @@
         <constructor-arg index="1" ref="accountDao"/>
     </bean>
 
+    <bean class="org.dean.course.framework.container.InstantiationTracingBeanPostProcessor"/>
+
 </beans>

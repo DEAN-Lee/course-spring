@@ -125,5 +125,57 @@ ApplicationContext自动检测部署到其中实现BeanFactoryPostProcessor接�
 
 您可以使用PropertySourcesPlaceholderConfigurer使用标准的Java属性格式将bean定义中的属性值外部化到单独的文件中。这样，部署应用程序的人员就可以自定义特定于环境的属性，
 比如数据库url和密码，而无需修改主XML定义文件或容器文件的复杂性或风险。
+考虑以下基于xml的配置元数据片段，其中定义了具有占位符值的数据源
+```xml
+<bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+    <property name="locations" value="classpath:com/something/jdbc.properties"/>
+</bean>
 
+<bean id="dataSource" destroy-method="close"
+        class="org.apache.commons.dbcp.BasicDataSource">
+    <property name="driverClassName" value="${jdbc.driverClassName}"/>
+    <property name="url" value="${jdbc.url}"/>
+    <property name="username" value="${jdbc.username}"/>
+    <property name="password" value="${jdbc.password}"/>
+</bean>
+```
+该示例显示了从外部属性文件配置的属性。在运行时，PropertySourcesPlaceholderConfigurer应用于替换数据源的某些属性的元数据。
+要替换的值指定为表单${property-name}的占位符，该表单遵循Ant、log4j和JSP EL样式。
 
+实际值来自标准Java属性格式的另一个文件
+```
+jdbc.driverClassName=org.hsqldb.jdbcDriver
+jdbc.url=jdbc:hsqldb:hsql://production:9002
+jdbc.username=sa
+jdbc.password=root
+```
+
+因此,${jdbc.username}字符串在运行时被替换为值'sa'，对于属性文件中匹配键的其他占位符值也适用同样的方法。
+PropertySourcesPlaceholderConfigurer检查bean定义的大多数属性和属性中的占位符。此外，您还可以自定义占位符前缀和后缀。
+
+使用Spring 2.5中引入的上下文名称空间，您可以用一个专用的配置元素配置属性占位符。
+您可以在location属性中以逗号分隔的列表形式提供一个或多个位置，如下面的示例所示
+```xml
+<context:property-placeholder location="classpath:com/something/jdbc.properties"/>
+```
+
+PropertySourcesPlaceholderConfigurer不仅在您指定的属性文件中查找属性。
+默认情况下，如果在指定的属性文件中找不到属性，它将检查Spring环境属性和常规Java系统属性。
+
+>您可以使用PropertySourcesPlaceholderConfigurer来替换类名，当您必须在运行时选择特定的实现类时，这有时很有用。
+>下面的示例展示了如何做到这一点
+>````xml
+><bean class="org.springframework.beans.factory.config.PropertySourcesPlaceholderConfigurer">
+>    <property name="locations">
+>        <value>classpath:com/something/strategy.properties</value>
+>    </property>
+>    <property name="properties">
+>        <value>custom.strategy.class=com.something.DefaultStrategy</value>
+>    </property>
+></bean>
+>
+><bean id="serviceStrategy" class="${custom.strategy.class}"/>
+>
+>如果不能在运行时将类解析为有效类，则在即将创建bean时，即在ApplicationContext非延迟init bean的预实例化esingletons()阶段，对bean的解析将失败。
+>
+```

@@ -164,7 +164,8 @@ PropertySourcesPlaceholderConfigurer不仅在您指定的属性文件中查找�
 
 >您可以使用PropertySourcesPlaceholderConfigurer来替换类名，当您必须在运行时选择特定的实现类时，这有时很有用。
 >下面的示例展示了如何做到这一点
->````xml
+>
+>xml
 ><bean class="org.springframework.beans.factory.config.PropertySourcesPlaceholderConfigurer">
 >    <property name="locations">
 >        <value>classpath:com/something/strategy.properties</value>
@@ -178,4 +179,33 @@ PropertySourcesPlaceholderConfigurer不仅在您指定的属性文件中查找�
 >
 >如果不能在运行时将类解析为有效类，则在即将创建bean时，即在ApplicationContext非延迟init bean的预实例化esingletons()阶段，对bean的解析将失败。
 >
+
+## 例子:PropertyOverrideConfigurer
+PropertyOverrideConfigurer是另一个bean工厂后处理器，它类似于PropertySourcesPlaceholderConfigurer，但与后者不同的是，
+原始定义可以有bean属性的默认值，也可以没有值。如果覆盖属性文件没有针对某个bean属性的条目，则使用默认上下文定义。
+
+请注意，bean定义不知道被覆盖，因此从XML定义文件中不能立即看出正在使用覆盖配置器。在多个PropertyOverrideConfigurer实例为同一个bean属性定义不同值的情况下，
+由于覆盖机制，最后一个实例胜出。
+
+属性文件配置行采用以下格式
+```text
+beanName.property=value
+```
+下面的清单显示了该格式的示例
+```text
+dataSource.driverClassName=com.mysql.jdbc.Driver
+dataSource.url=jdbc:mysql:mydb
+```
+
+这个示例文件可以与一个容器定义一起使用，该容器定义包含一个名为dataSource的bean，该bean具有driver和url属性。
+
+还支持复合属性名，只要路径的每个组件(除了被覆盖的final属性)都是非空的(假定由构造函数初始化)。在下面的示例中，tom bean的fred属性的bob属性的sammy属性被设置为标量值123
+```text
+tom.fred.bob.sammy=123
+```
+> 指定的重写值总是文字值。它们没有被转换为bean引用。当XML bean定义中的原始值指定了一个bean引用时，这个约定也适用。
+
+由于在Spring 2.5中引入了上下文名称空间，所以可以用专用的配置元素配置属性重写，如下面的示例所示
+```xml
+<context:property-override location="classpath:override.properties"/>
 ```

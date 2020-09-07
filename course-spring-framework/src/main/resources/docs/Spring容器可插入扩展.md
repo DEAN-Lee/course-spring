@@ -121,7 +121,7 @@ ApplicationContext自动检测部署到其中实现BeanFactoryPostProcessor接�
 >如果没有其他bean引用bean(工厂)后处理器，则该后处理器根本不会实例化。因此，将其标记为延迟初始化将被忽略，并且即使在声明元素时将default-lazy-init属性设置为true,
 > Bean(工厂)后处理器也将被快速实例化。
 
-## 示例:类名替换PropertySourcesPlaceholderConfigurer
+### 示例:类名替换PropertySourcesPlaceholderConfigurer
 
 您可以使用PropertySourcesPlaceholderConfigurer使用标准的Java属性格式将bean定义中的属性值外部化到单独的文件中。这样，部署应用程序的人员就可以自定义特定于环境的属性，
 比如数据库url和密码，而无需修改主XML定义文件或容器文件的复杂性或风险。
@@ -180,7 +180,7 @@ PropertySourcesPlaceholderConfigurer不仅在您指定的属性文件中查找�
 >如果不能在运行时将类解析为有效类，则在即将创建bean时，即在ApplicationContext非延迟init bean的预实例化esingletons()阶段，对bean的解析将失败。
 >
 
-## 例子:PropertyOverrideConfigurer
+### 例子:PropertyOverrideConfigurer
 PropertyOverrideConfigurer是另一个bean工厂后处理器，它类似于PropertySourcesPlaceholderConfigurer，但与后者不同的是，
 原始定义可以有bean属性的默认值，也可以没有值。如果覆盖属性文件没有针对某个bean属性的条目，则使用默认上下文定义。
 
@@ -209,3 +209,8 @@ tom.fred.bob.sammy=123
 ```xml
 <context:property-override location="classpath:override.properties"/>
 ```
+
+## 使用FactoryBean自定义实例化逻辑
+您可以实现org.springframework.beans.factory.FactoryBean接口为本身是工厂的对象提供。
+
+

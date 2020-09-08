@@ -213,4 +213,17 @@ tom.fred.bob.sammy=123
 ## 使用FactoryBean自定义实例化逻辑
 您可以实现org.springframework.beans.factory.FactoryBean接口为本身是工厂的对象提供。
 
+FactoryBean接口是Spring IoC容器实例化逻辑的可插入点。如果您有复杂的初始化代码(用Java来表达比(可能)冗长的XML更好)，那么您可以创建自己的FactoryBean，
+在类中编写复杂的初始化，然后将定制的FactoryBean插入到容器中。
+
+FactoryBean接口提供了三种方法
+* Object getObject():返回此工厂创建的对象的实例。实例可能被共享，这取决于这个工厂返回的是单例还是原型。
+* boolean isSingleton():如果FactoryBean返回单例，返回true;否则返回false。
+* Class getObjectType():返回getObject()方法返回的对象类型，如果事先不知道该类型，则返回null。
+
+FactoryBean的概念和接口在Spring框架的许多地方使用。Spring本身附带了50多个FactoryBean接口的实现。
+
+当您需要向容器请求实际的FactoryBean实例本身而不是它生成的bean时，在调用ApplicationContext的getBean()方法时在bean的id前面加上&符号(&)。
+因此，对于id为myBean的给定FactoryBean，在容器上调用getBean(“myBean”)将返回FactoryBean的产品，而调用getBean(“&myBean”)将返回FactoryBean实例本身。
+
 

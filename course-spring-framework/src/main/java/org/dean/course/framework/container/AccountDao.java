@@ -10,8 +10,8 @@ public class AccountDao {
     public void setUserName(String userName) {
         this.userName = userName;
     }
-    public  void printUserList(){
-        System.out.println("printUserList!!");
+    public  void printAccountList(){
+        System.out.println("printAccountList!!");
     }
 
 }

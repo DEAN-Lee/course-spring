@@ -19,4 +19,8 @@ public class UserInfoDao {
     public void setAge(String age) {
         this.age = age;
     }
+
+    public void printUserInfo(){
+        System.out.println("UserInfoDao print List");
+    }
 }

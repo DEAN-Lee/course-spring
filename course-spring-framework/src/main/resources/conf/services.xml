@@ -6,12 +6,18 @@
         https://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 
     <!-- services -->
+    <context:property-placeholder location="conf/jdbc.properties"/>
+    <import resource="daos.xml"></import>
+
+    <context:annotation-config/>
 
     <bean id="userService" class="org.dean.course.framework.container.UserServiceSetDI" autowire="default">
         <property name="accountDao" ref="accountDao"/>
         <property name="userInfoDao" ref="userInfoDao"/>
+        <property name="initializingBeanDao" ref="initializingBeanDao"/>
         <!-- additional collaborators and configuration for this bean go here -->
     </bean>
+
     <alias name="userService" alias="userService2"></alias>
 
     <!-- more bean definitions for services go here -->
@@ -25,6 +31,9 @@
 
     <bean class="org.dean.course.framework.container.InstantiationTracingBeanPostProcessor"/>
 
-    <context:property-placeholder location="conf/jdbc.properties"/>
+    <bean id="userServiceAnnotationDemo" class="org.dean.course.framework.container.UserServiceAnnotationDemo" autowire="default">
+    </bean>
+
+
 
 </beans>

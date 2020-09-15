@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+
+
+    <bean id="bluray" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+        <property name="staticField" value="org.dean.course.framework.container.annotation.Format.BLURAY" />
+    </bean>
+
+    <bean class="org.dean.course.framework.container.annotation.MovieCatalog">
+        <qualifier type="MovieQualifier">
+            <attribute key="format" value="VHS"/>
+            <attribute key="genre" value="Action"/>
+        </qualifier>
+        <property name="genre" value="Action>"></property>
+        <property name="format" value="VHS"></property>
+        <!-- inject any dependencies required by this bean -->
+    </bean>
+
+    <bean class="org.dean.course.framework.container.annotation.MovieCatalog">
+        <qualifier type="MovieQualifier">
+            <attribute key="format" value="VHS"/>
+            <attribute key="genre" value="Comedy"/>
+        </qualifier>
+        <property name="genre" value="comedy>"></property>
+        <property name="format" value="VHS"></property>
+        <!-- inject any dependencies required by this bean -->
+    </bean>
+
+    <bean class="org.dean.course.framework.container.annotation.MovieCatalog">
+        <meta key="format" value="DVD"/>
+        <meta key="genre" value="Action"/>
+        <!-- inject any dependencies required by this bean -->
+        <property name="genre" value="Action>"></property>
+        <property name="format" value="DVD"></property>
+    </bean>
+
+    <bean class="org.dean.course.framework.container.annotation.MovieCatalog">
+        <meta key="format" value="BLURAY"/>
+        <meta key="genre" value="Comedy"/>
+        <property name="genre" value="Comedy"></property>
+        <property name="format" value="BLURAY"></property>
+        <!-- inject any dependencies required by this bean -->
+    </bean>
+    <bean id="movieRecommender" class="org.dean.course.framework.container.annotation.MovieRecommender"></bean>
+
+</beans>

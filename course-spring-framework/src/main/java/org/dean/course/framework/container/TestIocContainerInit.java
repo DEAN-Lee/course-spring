@@ -4,7 +4,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class TestIocContainerInit {
-    private String temp;
     public static void main(String[] args) {
         // create and configure beans
         ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("conf/services.xml");

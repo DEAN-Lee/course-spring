@@ -172,7 +172,7 @@ Spring MVC DispatcherServlet等时使用此实现。下面的web.xml代码片段
 ```
 
 ## 使用@Bean注释
- 
+ @Bean是一个方法级注释，是XML的直接类比<bean>.该注释支持<bean>的屬性。例如：*内置-方法*销毁-方法*自动装配*名称。
 
 
 

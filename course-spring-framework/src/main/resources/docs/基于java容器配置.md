@@ -174,8 +174,152 @@ Spring MVC DispatcherServlet等时使用此实现。下面的web.xml代码片段
 ## 使用@Bean注释
  @Bean是一个方法级注释，是XML的直接类比<bean>.该注释支持<bean>的屬性。例如：*内置-方法*销毁-方法*自动装配*名称。
 
+您可以在注释了@ configuration或注释了@ component的类中使用@Bean注释。
 
+### 声明Bean
+要声明一个bean，您可以使用@Bean注释对方法进行注释。您可以使用这个方法在一个ApplicationContext中注册一个指定为方法返回值的类型的bean定义。
+默认情况下，bean名称与方法名称相同。下面的示例显示了一个@Bean方法声明
+```java
+@Configuration
+public class AppConfig {
 
+    @Bean
+    public TransferServiceImpl transferService() {
+        return new TransferServiceImpl();
+    }
+}
+```
+前面的配置与后面的Spring XML完全相同
+```xml
+<beans>
+    <bean id="transferService" class="com.acme.TransferServiceImpl"/>
+</beans>
+```
+这两个声明都使名为transferService的bean在ApplicationContext中可用，绑定到类型为TransferServiceImpl的对象实例，如下面的文本图像所示
+```text
+transferService -> com.acme.TransferServiceImpl
+```
+您还可以使用接口(或基类)返回类型声明@Bean方法，如下面的示例所示
+```java
+@Configuration
+public class AppConfig {
 
+    @Bean
+    public TransferService transferService() {
+        return new TransferServiceImpl();
+    }
+}
+```
+但是，这将预先类型预测的可见性限制为指定的接口类型(TransferService)。然后，容器只知道完整类型(TransferServiceImpl)一次，受影响的单例bean就被实例化了。
+非惰性单例bean根据它们的声明顺序被实例化，因此您可能会看到不同的类型匹配结果，这取决于其他组件何时尝试通过一个未声明的类型进行匹配(例如@Autowired TransferServiceImpl，
+它只在transferService bean被实例化后才解析)。
 
+>如果您始终通过声明的服务接口引用您的类型，那么您的@Bean返回类型可以安全地加入设计决策。但是，对于实现多个接口的组件，
+>或者对于可能由其实现类型引用的组件，声明可能最特定的返回类型(至少与引用bean的注入点所要求的特定程度相同)更为安全。
+
+### Bean的依赖关系
+带@ bean注释的方法可以有任意数量的参数，用于描述构建该bean所需的依赖关系。例如，如果我们的TransferService需要一个AccountRepository，
+我们可以用一个方法参数来具体化这个依赖关系，如下面的示例所示
+```java
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public TransferService transferService(AccountRepository accountRepository) {
+        return new TransferServiceImpl(accountRepository);
+    }
+}
+```
+解析机制与基于构造器的依赖项注入非常相似。更多细节请参阅相关部分。
+### 接受生命周期回调
+任何用@Bean注释定义的类都支持常规的生命周期回调，并且可以使用JSR-250中的@PostConstruct和@PreDestroy注释。更多细节请参见JSR-250注释。
+
+常规的Spring生命周期回调也得到了完全支持。如果一个bean实现了InitializingBean、DisposableBean或Lifecycle，容器将调用它们各自的方法。
+
+也完全支持*感知接口的标准集(例如BeanFactoryAware、BeanNameAware、MessageSourceAware、applicationcontext taware等)。
+
+@Bean注释支持指定任意的初始化和销毁回调方法，很像bean元素上的Spring XML s init-method和destroy-method属性，如下面的示例所示
   
+```java
+public class BeanOne {
+
+    public void init() {
+        // initialization logic
+    }
+}
+
+public class BeanTwo {
+
+    public void cleanup() {
+        // destruction logic
+    }
+}
+
+@Configuration
+public class AppConfig {
+
+    @Bean(initMethod = "init")
+    public BeanOne beanOne() {
+        return new BeanOne();
+    }
+
+    @Bean(destroyMethod = "cleanup")
+    public BeanTwo beanTwo() {
+        return new BeanTwo();
+    }
+}
+```
+
+> 默认情况下，使用Java配置定义的具有公共关闭或关闭方法的bean将与销毁回调一起被自动征用。如果您有一个公共关闭或关闭方法，并且不希望在容器关闭时调用它，
+>那么您可以将@Bean(destroyMethod="")添加到bean定义中，以禁用默认(推断)模式。
+> 
+>默认情况下，您可能希望对使用JNDI获取的资源执行此操作，因为它的生命周期是在应用程序之外管理的。特别是，确保总是对数据源执行此操作，因为在Java EE应用程序服务器上这是有问题的。
+>
+> 下面的示例显示如何防止数据源的自动销毁回调
+> ```java
+> @Bean(destroyMethod="")
+> public DataSource dataSource() throws NamingException {
+>     return (DataSource) jndiTemplate.lookup("MyDS");
+> }
+> ```
+> 
+>@ bean方法,你通常使用程序化的JNDI查找,通过使用Spring年代JndiTemplate JndiLocatorDelegate助手或直接使用JNDI InitialContext但不是JndiObjectFactoryBean变体(这将迫使你声明返回类型作为FactoryBean类型,
+>而不是实际的目标类型,因此很难使用交叉引用调用@ bean方法,打算在其他参考所提供的资源)。
+
+对于上面示例中的BeanOne，在构造期间直接调用init()方法同样有效，如下面的示例所示
+
+```java
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public BeanOne beanOne() {
+        BeanOne beanOne = new BeanOne();
+        beanOne.init();
+        return beanOne;
+    }
+
+    // ...
+}
+```
+> 当您直接在Java中工作时，您可以对对象做任何您喜欢的事情，而不总是需要依赖容器的生命周期。
+
+### 指定bean作用域
+Spring包含@Scope注释，以便您可以指定bean的范围。
+
+### 使用@Scope注释
+您可以指定用@Bean注释定义的bean应该具有特定的范围。您可以使用Bean作用域部分中指定的任何标准作用域。
+
+默认范围是singleton，但是您可以用@Scope注释覆盖它，如下面的示例所示
+```java
+@Configuration
+public class MyConfiguration {
+
+    @Bean
+    @Scope("prototype")
+    public Encryptor encryptor() {
+        // ...
+    }
+}
+```
+### @Scope和作用域内的代理

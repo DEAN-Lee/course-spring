@@ -447,7 +447,44 @@ public CommandManager commandManager() {
     }
 }
 ```
+### 关于基于java的配置如何在内部工作的进一步信息
+考虑下面的示例，它显示了被调用两次的@Bean注释方法
+```java
+@Configuration
+public class AppConfig {
 
+    @Bean
+    public ClientService clientService1() {
+        ClientServiceImpl clientService = new ClientServiceImpl();
+        clientService.setClientDao(clientDao());
+        return clientService;
+    }
 
+    @Bean
+    public ClientService clientService2() {
+        ClientServiceImpl clientService = new ClientServiceImpl();
+        clientService.setClientDao(clientDao());
+        return clientService;
+    }
 
+    @Bean
+    public ClientDao clientDao() {
+        return new ClientDaoImpl();
+    }
+}
+```
+在clientService1()和clientService2()中分别调用了一次clientDao()。由于此方法创建了ClientDaoImpl的一个新实例并返回它，
+因此通常需要有两个实例(每个服务一个)。这肯定是有问题的:在Spring中，实例化的bean在默认情况下有一个singleton作用域。
+这就是神奇之处:所有@Configuration类在启动时都由CGLIB生成子类。在子类中，子方法在调用父方法并创建一个新实例之前，首先检查容器是否有缓存的(作用域限定的)bean。
 
+> 根据bean的范围，行为可能不同。我们在这里讨论的是单例。
+
+>从Spring 3.2开始，不再需要将CGLIB添加到类路径中，因为CGLIB类已经在org.springframework下重新打包。并直接包含在spring-core JAR中。
+
+>由于CGLIB在启动时动态添加特性，所以有一些限制。特别是，配置类不能是最终的。然而，在4.3中，配置类允许使用任何构造函数，
+>包括使用@Autowired或为默认注入使用单一的非默认构造函数声明。
+>
+>如果您希望避免任何cglib强加的限制，可以考虑在非@ configuration类上声明@Bean方法(例如，改为在纯@Component类上)。
+>这样，@Bean方法之间的交叉方法调用就不会被拦截，因此您只能在构造函数或方法级别上独家依赖于依赖注入。
+
+## 编写基于java的配置

@@ -323,3 +323,131 @@ public class MyConfiguration {
 }
 ```
 ### @Scope和作用域内的代理
+Spring提供了一种通过作用域代理处理作用域依赖关系的方便方法。在使用XML配置时，创建此类代理的最简单方法是<aop:scoped-proxy/>元素配置。
+用@Scope注释配置Java中的bean可以提供与proxyMode属性同等的支持。默认是没有代理(ScopedProxyMode. no)，但是您可以指定copedProxyMode.TARGET_CLASS或ScopedProxyMode.INTERFACES。
+
+如果您使用Java将范围代理示例从XML参考文档(请参阅范围代理)移植到我们的@Bean，它类似于以下情况
+```java
+// an HTTP Session-scoped bean exposed as a proxy
+@Bean
+@SessionScope
+public UserPreferences userPreferences() {
+    return new UserPreferences();
+}
+
+@Bean
+public Service userService() {
+    UserService service = new SimpleUserService();
+    // a reference to the proxied userPreferences bean
+    service.setUserPreferences(userPreferences());
+    return service;
+}
+```
+
+### 定制Bean命名
+默认情况下，配置类使用@Bean方法的名称作为生成的bean的名称。但是，可以使用name属性覆盖此功能，如下面的示例所示
+```java
+@Configuration
+public class AppConfig {
+
+    @Bean(name = "myThing")
+    public Thing thing() {
+        return new Thing();
+    }
+}
+```
+### Bean别名
+正如在命名bean中所讨论的，有时希望给单个bean起多个名称，否则称为bean混叠。为此，@Bean注释的name属性接受一个字符串数组。下面的示例展示了如何为一个bean设置大量别名
+```java
+@Configuration
+public class AppConfig {
+
+    @Bean({"dataSource", "subsystemA-dataSource", "subsystemB-dataSource"})
+    public DataSource dataSource() {
+        // instantiate, configure and return DataSource bean...
+    }
+}
+```
+
+### bean描述
+有时，为bean提供更详细的文本描述是有帮助的。当为了监视目的而公开bean(可能通过JMX)时，这尤其有用。
+
+要向@Bean添加描述，可以使用@Description注释，如下面的示例所示
+```java
+@Configuration
+public class AppConfig {
+
+    @Bean
+    @Description("Provides a basic example of a bean")
+    public Thing thing() {
+        return new Thing();
+    }
+}
+```
+
+## 使用@Configuration注释
+@Configuration是一个类级注释，指示对象是bean定义的源。@Configuration类通过公共的@Bean注释方法声明bean。在@Configuration类上调用@Bean方法也可以用来定义bean间的依赖关系。
+有关一般介绍，请参阅基本概念:@Bean和@Configuration。
+
+### 注入Inter-bean依赖性
+当bean彼此具有依赖关系时，表达这种依赖关系就像让一个bean方法调用另一个bean方法一样简单，如下面的示例所示
+```java
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public BeanOne beanOne() {
+        return new BeanOne(beanTwo());
+    }
+
+    @Bean
+    public BeanTwo beanTwo() {
+        return new BeanTwo();
+    }
+}
+```
+在前面的示例中，beanOne通过构造函数注入接收到对beanTwo的引用。
+> 仅当@Bean方法在@Configuration类中声明时，这种声明bean间依赖关系的方法才有效。不能通过使用纯@Component类来声明bean之间的依赖关系。
+
+### 查询方法注入
+如前所述，查找方法注入是一种高级特性，应该很少使用。在单例作用域bean与原型作用域bean有依赖关系的情况下，它非常有用。
+将Java用于这种类型的配置提供了一种实现这种模式的自然方法。下面的示例展示了如何使用查找方法注入
+```java
+public abstract class CommandManager {
+    public Object process(Object commandState) {
+        // grab a new instance of the appropriate Command interface
+        Command command = createCommand();
+        // set the state on the (hopefully brand new) Command instance
+        command.setState(commandState);
+        return command.execute();
+    }
+
+    // okay... but where is the implementation of this method?
+    protected abstract Command createCommand();
+}
+```
+通过使用Java配置，您可以创建CommandManager的一个子类，其中抽象createCommand()方法被重写，其方式是查找新的(原型)命令对象。下面的示例展示了如何做到这一点
+```java
+@Bean
+@Scope("prototype")
+public AsyncCommand asyncCommand() {
+    AsyncCommand command = new AsyncCommand();
+    // inject dependencies here as required
+    return command;
+}
+
+@Bean
+public CommandManager commandManager() {
+    // return new anonymous implementation of CommandManager with createCommand()
+    // overridden to return a new prototype Command object
+    return new CommandManager() {
+        protected Command createCommand() {
+            return asyncCommand();
+        }
+    }
+}
+```
+
+
+
+

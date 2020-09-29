@@ -487,4 +487,3 @@ public class AppConfig {
 >如果您希望避免任何cglib强加的限制，可以考虑在非@ configuration类上声明@Bean方法(例如，改为在纯@Component类上)。
 >这样，@Bean方法之间的交叉方法调用就不会被拦截，因此您只能在构造函数或方法级别上独家依赖于依赖注入。
 
-## 编写基于java的配置

@@ -140,4 +140,108 @@ public static void main(String[] args) {
 > 在Spring Framework 4.3中只支持@Configuration类中的构造函数注入。还要注意，如果目标bean只定义了一个构造函数，就没有必要指定@Autowired。
 
 ### 完全限定导入的bean以方便导航
+在前面的场景中，使用@Autowired工作得很好，并且提供了所需的模块化，但是确定autowired bean定义在哪里声明仍然有点不明确。
+例如，作为一个正在查看ServiceConfig的开发人员，您如何知道@Autowired AccountRepository bean在哪里声明?它在代码中没有明确表示，这可能很好。
+请记住，用于Eclipse的Spring工具提供了一些工具，可以呈现显示如何连接所有内容的图形，这可能是您所需要的全部内容。而且，Java IDE可以很容易地找到AccountRepository
+类型的所有声明和使用，并快速地向您显示返回该类型的@Bean方法的位置。
+
+如果这种模糊性是不可接受的，并且您希望在IDE中从一个@Configuration类直接导航到另一个，请考虑自动装配配置类本身。下面的示例展示了如何做到这一点
+```java
+@Configuration
+public class ServiceConfig {
+
+    @Autowired
+    private RepositoryConfig repositoryConfig;
+
+    @Bean
+    public TransferService transferService() {
+        // navigate 'through' the config class to the @Bean method!
+        return new TransferServiceImpl(repositoryConfig.accountRepository());
+    }
+}
+```
+在上述情况下，定义AccountRepository是完全明确的。但是，ServiceConfig现在与RepositoryConfig紧密耦合。这就是权衡。
+这种紧密耦合可以通过使用基于接口或基于抽象类的@Configuration类得到一定程度的缓解。考虑以下示例
+```java
+@Configuration
+public class ServiceConfig {
+
+    @Autowired
+    private RepositoryConfig repositoryConfig;
+
+    @Bean
+    public TransferService transferService() {
+        return new TransferServiceImpl(repositoryConfig.accountRepository());
+    }
+}
+
+@Configuration
+public interface RepositoryConfig {
+
+    @Bean
+    AccountRepository accountRepository();
+}
+
+@Configuration
+public class DefaultRepositoryConfig implements RepositoryConfig {
+
+    @Bean
+    public AccountRepository accountRepository() {
+        return new JdbcAccountRepository(...);
+    }
+}
+
+@Configuration
+@Import({ServiceConfig.class, DefaultRepositoryConfig.class})  // import the concrete config!
+public class SystemTestConfig {
+
+    @Bean
+    public DataSource dataSource() {
+        // return DataSource
+    }
+
+}
+
+public static void main(String[] args) {
+    ApplicationContext ctx = new AnnotationConfigApplicationContext(SystemTestConfig.class);
+    TransferService transferService = ctx.getBean(TransferService.class);
+    transferService.transfer(100.00, "A123", "C456");
+}
+```
+现在ServiceConfig相对于具体的DefaultRepositoryConfig是松散耦合的，而且内置的IDE工具仍然有用:您可以轻松地获得RepositoryConfig实现的类型层次结构。
+通过这种方式，导航@Configuration类及其依赖项与导航基于接口的代码的通常过程没有什么不同。
+
+> 如果你想影响某些豆类的启动创建订单,考虑将其中一些声明为@Lazy(用于创建在第一次访问,而不是在启动时)或@DependsOn某些其他bean(确保特定的其他bean创建当前bean之前,超出后者直接依赖暗示)。
+
+## 有条件地包括@Configuration类或@Bean方法
+根据任意的系统状态，有条件地启用或禁用一个完整的@Configuration类，甚至是单个的@Bean方法，这通常很有用。
+一个常见的例子是只有在Spring环境中启用了特定的概要文件时才使用@Profile注释来激活Bean(参见Bean定义概要文件了解详细信息)。
+
+@Profile注释实际上是通过使用一个更灵活的注释@Conditional实现的。@Conditional注释表示特定的org.springframework.context.annotation。在注册@Bean之前应该咨询的条件实现。
+
+Condition接口的实现提供了一个matches()方法，该方法返回true或false。例如，下面的清单显示了用于@Profile的实际条件实现
+```java
+@Override
+public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+    // Read the @Profile annotation attributes
+    MultiValueMap<String, Object> attrs = metadata.getAllAnnotationAttributes(Profile.class.getName());
+    if (attrs != null) {
+        for (Object value : attrs.get("value")) {
+            if (context.getEnvironment().acceptsProfiles(((String[]) value))) {
+                return true;
+            }
+        }
+        return false;
+    }
+    return true;
+}
+```
+详细解析参考@Conditional文档
+
+## 结合Java和XML配置
+Spring @Configuration类支持的目标并不是100%完全替代Spring XML。有些工具(如Spring XML名称空间)仍然是配置容器的理想方式。在XML方便或必要的情况下,
+你有一个选择:要么以XML为中心的方法通过使用容器实例化,例如,ClassPathXmlApplicationContext或实例化它以java为中心的方法通过使用所和@ImportResource注释导入XML。
+
+### 使用以xml为中心的@Configuration类
+
 

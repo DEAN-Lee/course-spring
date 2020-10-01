@@ -243,5 +243,127 @@ Spring @Configuration类支持的目标并不是100%完全替代Spring XML。有
 你有一个选择:要么以XML为中心的方法通过使用容器实例化,例如,ClassPathXmlApplicationContext或实例化它以java为中心的方法通过使用所和@ImportResource注释导入XML。
 
 ### 使用以xml为中心的@Configuration类
+最好是从XML引导Spring容器，并以特别的方式包含@Configuration类。例如，在使用Spring XML的大型现有代码库中，
+更容易根据需要创建@Configuration类并从现有XML文件中包含它们。在本节的后面，我们将介绍在这种以xml为中心的情况下使用@Configuration类的选项。
+
+### 将@Configuration类声明为普通Spring<bean>标签
+请记住，@Configuration类最终是容器中的bean定义。在本系列示例中，我们创建了一个名为AppConfig的@Configuration类，并将其包含在其中座位
+<bean>元素。因为<context:annotation-config/>打开时，容器识别@Configuration注释并正确处理在AppConfig中声明的@Bean方法。
+
+下面的示例展示了Java中的一个普通配置类。
+```java
+@Configuration
+public class AppConfig {
+
+    @Autowired
+    private DataSource dataSource;
+
+    @Bean
+    public AccountRepository accountRepository() {
+        return new JdbcAccountRepository(dataSource);
+    }
+
+    @Bean
+    public TransferService transferService() {
+        return new TransferService(accountRepository());
+    }
+}
+```
+下面的示例展示了一个样例system-test-config.xml文件的一部分
+```xml
+<beans>
+    <!-- enable processing of annotations such as @Autowired and @Configuration -->
+    <context:annotation-config/>
+    <context:property-placeholder location="classpath:/com/acme/jdbc.properties"/>
+
+    <bean class="com.acme.AppConfig"/>
+
+    <bean class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+</beans>
+```
+下面的示例展示了一个可能的jdbc。属性文件
+```text
+jdbc.url=jdbc:hsqldb:hsql://localhost/xdb
+jdbc.username=sa
+jdbc.password=
+```
+```java
+public static void main(String[] args) {
+    ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:/com/acme/system-test-config.xml");
+    TransferService transferService = ctx.getBean(TransferService.class);
+    // ...
+}
+```
+> 在system-test-config.xml文件,AppConfig 没有声明id元素。虽然这样做是可以接受的，但是没有必要这样做，因为没有其他bean引用过它，
+>而且不太可能通过名称显式地从容器中获取它。类似地，数据源bean只根据类型自动生成，因此显式bean id并不是严格要求的。
+
+### 使用<context:component-scan/> 选址@Configuration 类
+因为@Configuration是用@Component进行元注释的，所以带有@Configuration注释的类是组件扫描的自动候选对象。使用前面示例中描述的相同场景，
+我们可以重新定义system-test-config.xml，以利用组件扫描的优势。我们不需要显式声明<context:annotation-config/> 因为
+<context:component-scan/>启用相同的功能。
+
+下面的示例显示修改后的system-test . config.xml文件
+```xml
+<beans>
+    <!-- picks up and registers AppConfig as a bean definition -->
+    <context:component-scan base-package="com.acme"/>
+    <context:property-placeholder location="classpath:/com/acme/jdbc.properties"/>
+
+    <bean class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+</beans>
+```
+
+### 使用@ImportResource以类为中心使用XML
+在以@Configuration类作为配置容器的主要机制的应用程序中，仍然可能需要使用至少一些XML。在这些场景中，您可以使用@ImportResource并只定义所需的XML。
+这样做可以实现以java为中心的方法来配置容器，并将XML保持在最低限度。下面的示例(包括一个配置类、一个定义bean的XML文件、一个属性文件和主类)
+展示了如何使用@ImportResource注释来实现以java为中心的配置，该配置根据需要使用XML
+
+```java
+@Configuration
+@ImportResource("classpath:/com/acme/properties-config.xml")
+public class AppConfig {
+
+    @Value("${jdbc.url}")
+    private String url;
+
+    @Value("${jdbc.username}")
+    private String username;
+
+    @Value("${jdbc.password}")
+    private String password;
+
+    @Bean
+    public DataSource dataSource() {
+        return new DriverManagerDataSource(url, username, password);
+    }
+}
+```
+```text
+properties-config.xml
+<beans>
+    <context:property-placeholder location="classpath:/com/acme/jdbc.properties"/>
+</beans>
+
+jdbc.properties
+jdbc.url=jdbc:hsqldb:hsql://localhost/xdb
+jdbc.username=sa
+jdbc.password=
+```
+
+```java
+public static void main(String[] args) {
+    ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+    TransferService transferService = ctx.getBean(TransferService.class);
+    // ...
+}
+```
 
 

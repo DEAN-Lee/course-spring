@@ -1,6 +1,9 @@
 package org.dean.course.framework.container.scan;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.env.Environment;
 
 public class ScanAnnotationDemo {
     public static void main(String[] args) {
@@ -11,5 +14,9 @@ public class ScanAnnotationDemo {
         simpleMovieLister.getMovie();
         movieFinder.printMovie();
 
+//        ApplicationContext ctx = new GenericApplicationContext();
+        Environment env = context.getEnvironment();
+        boolean containsMyProperty = env.containsProperty("my-property");
+        System.out.println("Does my environment contain the 'my-property' property? " + containsMyProperty);
     }
 }

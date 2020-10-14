@@ -48,4 +48,17 @@ Spring提供了两个消息源实现，ResourceBundleMessageSource和StaticMessa
     argument.required=The {0} argument is required.
 
 ```
+下一个示例显示了运行MessageSource功能的程序。记住，所有ApplicationContext实现也是MessageSource实现，因此可以cast到MessageSource接口。
+```java
+public static void main(String[] args) {
+    MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
+    String message = resources.getMessage("message", null, "Default", Locale.ENGLISH);
+    System.out.println(message);
+}
+```
+上述程序的输出结果如下所示
+```text
+Alligators rock!
+```
+
 

@@ -61,4 +61,47 @@ public static void main(String[] args) {
 Alligators rock!
 ```
 
+总之，MessageSource是在一个名为bean的文件中定义的xml文件，它存在于类路径的根。messageSource bean定义通过其basenames属性引用大量资源包。
+在列表中传递给basenames属性的三个文件作为类路径的根文件存在，它们被称为format.properties,exceptions.properties,和windows.properties,分别。
+
+下一个示例显示了传递给消息查找的参数。这些参数被转换为字符串对象，并插入到查找消息中的占位符中。
+```xml
+<beans>
+
+    <!-- this MessageSource is being used in a web application -->
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename" value="exceptions"/>
+    </bean>
+
+    <!-- lets inject the above MessageSource into this POJO -->
+    <bean id="example" class="com.something.Example">
+        <property name="messages" ref="messageSource"/>
+    </bean>
+
+</beans>
+```
+```java
+public class Example {
+
+    private MessageSource messages;
+
+    public void setMessages(MessageSource messages) {
+        this.messages = messages;
+    }
+
+    public void execute() {
+        String message = this.messages.getMessage("argument.required",
+            new Object [] {"userDao"}, "Required", Locale.ENGLISH);
+        System.out.println(message);
+    }
+}
+```
+调用execute()方法的结果输出如下所示
+```text
+The userDao argument is required.
+```
+
+关于国际化(i18n)， Spring的各种MessageSource实现遵循与标准JDK ResourceBundle相同的语言环境解析和回退规则。
+
+
 

@@ -102,6 +102,111 @@ The userDao argument is required.
 ```
 
 关于国际化(i18n)， Spring的各种MessageSource实现遵循与标准JDK ResourceBundle相同的语言环境解析和回退规则。
+简而言之，继续前面定义的示例messageSource，如果您希望根据英国(en-GB)地区解析消息，您将创建名为format_en_GB.properties, exceptions_en_GB.properties, 
+ 和windows_en_GB.properties。
+ 
+ 通常，语言环境解析由应用程序的周围环境管理。在下面的示例中，手动指定解析(英国)消息所依据的语言环境
+ ```text
+# in exceptions_en_GB.properties
+argument.required=Ebagum lad, the ''{0}'' argument is required, I say, required.
+```
+```java
+public static void main(final String[] args) {
+    MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
+    String message = resources.getMessage("argument.required",
+        new Object [] {"userDao"}, "Required", Locale.UK);
+    System.out.println(message);
+}
+```
+运行上述程序的结果输出如下
+```text
+Ebagum lad, the 'userDao' argument is required, I say, required.
 
+```
 
+您还可以使用MessageSourceAware接口来获取对已定义的任何消息源的引用。当创建和配置bean时，
+在实现MessageSourceAware接口的ApplicationContext中定义的任何bean都将被注入应用上下文的MessageSource。
+
+>作为ResourceBundleMessageSource的替代方案，Spring提供了一个ReloadableResourceBundleMessageSource类。这个变体支持相同的bundle文件格式，
+>但是比基于JDK的标准ResourceBundleMessageSource实现更加灵活。特别是，它允许从任何Spring资源位置读取文件(不仅仅是从类路径)，
+>并支持bundle属性文件的热重新加载(同时有效地缓存它们)。有关详细信息，请参见ReloadableResourceBundleMessageSource javadoc。
+
+## 标准和自定义事件
+ApplicationContext中的事件处理是通过ApplicationEvent类和ApplicationListener接口提供的。如果实现ApplicationListener接口的bean被部署到上下文中，
+那么每当一个ApplicationEvent被发布到ApplicationContext时，该bean就会得到通知。本质上，这就是标准的观察者设计模式。
+
+> 从Spring 4.2开始，事件基础设施已经得到了显著改进，并提供了一个基于注释的模型，以及发布任意事件的能力(也就是说，不需要从ApplicationEvent扩展的对象)。
+>当发布这样的对象时，我们为您将其包装在事件中。
+
+下表描述了Spring提供的标准事件
+
+|事件| 说明   |
+|---|---|
+|ContextRefreshedEvent|当初始化或刷新ApplicationContext时发布(例如，通过使用ConfigurableApplicationContext接口上的refresh()方法)。<br/>在这里，initialized意味着加载所有bean，检测和激活后处理器bean，预实例化单例，并且ApplicationContext对象已经准备好可以使用了。<br/>只要上下文没有被关闭，刷新就可以被触发多次，前提是所选的ApplicationContext实际上支持这种热刷新。例如，XmlWebApplicationContext支持热刷新，而GenericApplicationContext不支持。
+|ContextStartedEvent|通过使用ConfigurableApplicationContext接口上的start()方法启动ApplicationContext时发布。<br/>在这里，started意味着所有生命周期bean都收到一个显式的启动信号。<br/>通常，这个信号用于在显式停止后重新启动bean，但是它也可以用于启动尚未配置为自动启动的组件(例如，尚未在初始化时启动的组件)。|
+|ContextStoppedEvent|在使用ConfigurableApplicationContext接口上的stop()方法停止ApplicationContext时发布。<br/>在这里，stopped意味着所有生命周期bean都接收到一个显式的停止信号。一个停止的上下文可以通过一个start()调用重新启动。|
+|ContextClosedEvent|通过使用ConfigurableApplicationContext接口上的close()方法或通过JVM关机钩子关闭ApplicationContext时发布。<br/>在这里，“关闭”意味着所有的单例bean将被销毁。一旦上下文关闭，它就会到达生命的终点，无法刷新或重新启动。|
+|RequestHandledEvent|一个特定于web的事件，告诉所有bean一个HTTP请求已经得到服务。此事件在请求完成后发布。此事件仅适用于使用Spring s DispatcherServlet的web应用程序。|
+|ServletRequestHandledEvent|RequestHandledEvent的一个子类，用于添加特定于servlet的上下文信息。|
+
+您还可以创建和发布自己的自定义事件。下面的示例展示了一个扩展Spring的ApplicationEvent基类的简单类
+```java
+public class BlockedListEvent extends ApplicationEvent {
+
+    private final String address;
+    private final String content;
+
+    public BlockedListEvent(Object source, String address, String content) {
+        super(source);
+        this.address = address;
+        this.content = content;
+    }
+
+    // accessor and other methods...
+}
+```
+要发布自定义ApplicationEvent，请调用ApplicationEventPublisher上的publishEvent()方法。通常，这是通过创建实现ApplicationEventPublisherAware的类并将其注册为Spring bean来完成的。下面的示例展示了这样一个类.
+```java
+public class EmailService implements ApplicationEventPublisherAware {
+
+    private List<String> blockedList;
+    private ApplicationEventPublisher publisher;
+
+    public void setBlockedList(List<String> blockedList) {
+        this.blockedList = blockedList;
+    }
+
+    public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+        this.publisher = publisher;
+    }
+
+    public void sendEmail(String address, String content) {
+        if (blockedList.contains(address)) {
+            publisher.publishEvent(new BlockedListEvent(this, address, content));
+            return;
+        }
+        // send email...
+    }
+}
+```
+在配置时，Spring容器检测到EmailService实现了ApplicationEventPublisherAware，并自动调用setApplicationEventPublisher()。实际上，传入的参数就是Spring容器本身。您正在通过应用程序的ApplicationEventPublisher接口与应用程序上下文交互。
+
+要接收自定义ApplicationEvent，您可以创建一个实现ApplicationListener的类，并将其注册为一个Spring bean。下面的示例展示了这样一个类.
+```java
+public class BlockedListNotifier implements ApplicationListener<BlockedListEvent> {
+
+    private String notificationAddress;
+
+    public void setNotificationAddress(String notificationAddress) {
+        this.notificationAddress = notificationAddress;
+    }
+
+    public void onApplicationEvent(BlockedListEvent event) {
+        // notify appropriate parties via notificationAddress...
+    }
+}
+```
+注意，ApplicationListener通常是用自定义事件的类型参数化的(在前面的示例中是BlockedListEvent)。这意味着onApplicationEvent()方法可以保持类型安全，避免向下强制转换。
+
+  
 

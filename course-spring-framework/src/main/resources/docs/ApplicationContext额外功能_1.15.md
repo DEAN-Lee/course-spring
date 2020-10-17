@@ -207,6 +207,33 @@ public class BlockedListNotifier implements ApplicationListener<BlockedListEvent
 }
 ```
 注意，ApplicationListener通常是用自定义事件的类型参数化的(在前面的示例中是BlockedListEvent)。这意味着onApplicationEvent()方法可以保持类型安全，避免向下强制转换。
+您可以注册任意数量的事件监听器，但是请注意，默认情况下，事件监听器同步接收事件。这意味着publishEvent()方法会阻塞，直到所有监听器都完成了事件的处理。 
+这种同步和单线程方法的一个优点是，当侦听器接收到事件时，如果事务上下文可用，它将在发布程序的事务上下文内操作。
+如果需要另一种事件发布策略，请参阅javadoc for Spring s ApplicationEventMulticaster接口和SimpleApplicationEventMulticaster实现以获得配置选项。
+
+下面的示例显示了用于注册和配置上面每个类的bean定义
+```xml
+<bean id="emailService" class="example.EmailService">
+    <property name="blockedList">
+        <list>
+            <value>known.spammer@example.org</value>
+            <value>known.hacker@example.org</value>
+            <value>john.doe@example.org</value>
+        </list>
+    </property>
+</bean>
+
+<bean id="blockedListNotifier" class="example.BlockedListNotifier">
+    <property name="notificationAddress" value="blockedlist@example.org"/>
+</bean>
+```
+
+将它们放在一起，当调用emailService bean的sendEmail()方法时，如果有任何需要阻止的电子邮件消息，则发布类型为BlockedListEvent的自定义事件。
+blockedListNotifier bean注册为一个ApplicationListener并接收BlockedListEvent，此时它可以通知适当的方。
+
+>Spring事件机制是为相同应用程序上下文中的Spring bean之间的简单通信而设计的。然而，对于更复杂的企业集成需求，单独维护的Spring integration项目提供了构建轻量级、面向模式、事件驱动架构的完整支持，这些架构构建在众所周知的Spring编程模型之上。
+
+
 
   
 

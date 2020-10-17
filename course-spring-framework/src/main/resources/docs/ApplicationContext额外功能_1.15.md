@@ -233,7 +233,32 @@ blockedListNotifier bean注册为一个ApplicationListener并接收BlockedListEv
 
 >Spring事件机制是为相同应用程序上下文中的Spring bean之间的简单通信而设计的。然而，对于更复杂的企业集成需求，单独维护的Spring integration项目提供了构建轻量级、面向模式、事件驱动架构的完整支持，这些架构构建在众所周知的Spring编程模型之上。
 
+### Annotation-based Event Listeners 基于注解的事件监听
+从Spring 4.2开始，您可以使用@EventListener注释在托管bean的任何公共方法上注册事件监听器。可以像下面这样重写BlockedListNotifier
+```java
+public class BlockedListNotifier {
 
+    private String notificationAddress;
+
+    public void setNotificationAddress(String notificationAddress) {
+        this.notificationAddress = notificationAddress;
+    }
+
+    @EventListener
+    public void processBlockedListEvent(BlockedListEvent event) {
+        // notify appropriate parties via notificationAddress...
+    }
+}
+```
+方法签名再次声明它侦听的事件类型，但是这次使用了灵活的名称，并且没有实现特定的侦听器接口。只要实际事件类型在其实现层次结构中解析泛型参数，就可以通过泛型缩小事件类型.
+
+如果您的方法应该侦听多个事件，或者您希望在不使用任何参数的情况下定义它，那么还可以在注释本身上指定事件类型。下面的示例展示了如何做到这一点
+```java
+@EventListener({ContextStartedEvent.class, ContextRefreshedEvent.class})
+public void handleContextStart() {
+    // ...
+}
+```
 
   
 

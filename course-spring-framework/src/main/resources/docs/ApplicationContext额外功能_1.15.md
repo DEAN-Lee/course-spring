@@ -260,5 +260,18 @@ public void handleContextStart() {
 }
 ```
 
-  
+还可以通过使用定义SpEL表达式的注释的条件属性来添加额外的运行时过滤，该注释应该与针对特定事件实际调用方法相匹配。
+
+下面的例子展示了我们的通知程序如何被重写，只有在事件的内容属性等于my-event时才被调用:
+```java
+@EventListener(condition = "#blEvent.content == 'my-event'")
+public void processBlockedListEvent(BlockedListEvent blockedListEvent) {
+    // notify appropriate parties via notificationAddress...
+}
+```
+每个SpEL表达式根据一个专用上下文计算。下表列出了上下文可用的项目，以便您可以使用它们进行条件事件处理:
+
+|名称|位置|说明|示例|
+|---|---|---|---|
+|Even|root object|  实际的ApplicationEvent。|#root.event 或 event|
 

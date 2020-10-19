@@ -273,5 +273,21 @@ public void processBlockedListEvent(BlockedListEvent blockedListEvent) {
 
 |名称|位置|说明|示例|
 |---|---|---|---|
-|Even|root object|  实际的ApplicationEvent。|#root.event 或 event|
+|Event|root object|  实际的ApplicationEvent。|#root.event 或 event|
+|数组参数|root object|  用于调用方法的参数(作为对象数组)。|#root.args 或 args; args[0]访问第一个参数等。|
+|参数名称|评估环境|  任何方法参数的名称。如果由于某种原因，名称不可用(例如，因为在已编译的字节代码中没有调试信息)，也可以使用#a<#arg>语法使用单个参数，其中<#arg>表示参数索引(从0开始)。|#blEvent或#a0(您还可以使用#p0或#p<#arg>参数表示法作为别名)|
+
+请注意,#root.event。event允许您访问基础事件，即使您的方法签名实际上引用了已发布的任意对象。
+
+如果你需要发布一个事件作为处理另一个事件的结果，你可以改变方法签名来返回应该发布的事件，如下面的例子所示:
+```java
+@EventListener
+public ListUpdateEvent handleBlockedListEvent(BlockedListEvent event) {
+    // notify appropriate parties via notificationAddress and
+    // then publish a ListUpdateEvent...
+}
+```
+> 异步监听器不支持此特性。
+
+这个新方法为上面方法处理的每个BlockedListEvent发布一个新的ListUpdateEvent。如果需要发布多个事件，则可以返回一个事件集合。
 

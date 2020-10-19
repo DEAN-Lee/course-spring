@@ -291,3 +291,54 @@ public ListUpdateEvent handleBlockedListEvent(BlockedListEvent event) {
 
 这个新方法为上面方法处理的每个BlockedListEvent发布一个新的ListUpdateEvent。如果需要发布多个事件，则可以返回一个事件集合。
 
+### 异步监听
+如果需要一个特定的侦听器异步处理事件，可以重用常规的@Async支持。下面的例子展示了如何做到这一点:
+```java
+@EventListener
+@Async
+public void processBlockedListEvent(BlockedListEvent event) {
+    // BlockedListEvent is processed in a separate thread
+}
+```
+
+在使用异步事件时要注意以下限制:
+* 如果异步事件侦听器抛出异常，则该异常不会传播到调用者。有关更多细节，请参阅AsyncUncaughtExceptionHandler。
+* 异步事件侦听器方法不能通过返回值来发布后续事件。如果您需要发布另一个事件作为处理的结果，注入一个ApplicationEventPublisher来手动发布事件。
+
+### 排序监听
+如果需要先调用一个监听器，可以在方法声明中添加@Order注释，如下例所示:
+```java
+@EventListener
+@Order(42)
+public void processBlockedListEvent(BlockedListEvent event) {
+    // notify appropriate parties via notificationAddress...
+}
+```
+
+### 通用的事件
+还可以使用泛型来进一步定义事件的结构。考虑使用EntityCreatedEvent<t>，其中T是所创建的实际实体的类型。</t>例如，您可以创建以下侦听器定义来只为一个人接收EntityCreatedEvent:
+```java
+@EventListener
+public void onPersonCreated(EntityCreatedEvent<Person> event) {
+    // ...
+}
+```
+由于类型擦除，只有在触发的事件解析了事件侦听器筛选的泛型参数(即，类似类PersonCreatedEvent扩展了EntityCreatedEvent{…})时，这种方法才有效。</person>
+
+在某些情况下，如果所有事件都遵循相同的结构(前面示例中的事件也应该如此)，那么这可能会变得非常乏味。在这种情况下，您可以实现ResolvableTypeProvider来指导运行时环境所提供的框架。下面的事件展示了如何做到这一点:
+
+```java
+public class EntityCreatedEvent<T> extends ApplicationEvent implements ResolvableTypeProvider {
+
+    public EntityCreatedEvent(T entity) {
+        super(entity);
+    }
+
+    @Override
+    public ResolvableType getResolvableType() {
+        return ResolvableType.forClassWithGenerics(getClass(), ResolvableType.forInstance(getSource()));
+    }
+}
+```
+
+>这不仅适用于ApplicationEvent，也适用于任何作为事件发送的对象。

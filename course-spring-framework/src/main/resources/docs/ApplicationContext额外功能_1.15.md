@@ -380,7 +380,19 @@ public class EntityCreatedEvent<T> extends ApplicationEvent implements Resolvabl
 这相当于引导一个独立的ApplicationContext(仅托管在Java EE环境中)来访问Java EE服务器设施。RAR部署是部署无头WAR文件(没有任何HTTP入口点的WAR文件，
 仅用于在Java EE环境中引导Spring ApplicationContext)的更自然的替代方案。
 
-RAR部署对于不需要HTTP入口点，而只包含消息端点和计划作业的应用程序上下文非常理想。
+RAR部署对于不需要HTTP入口点，而只包含消息端点和计划作业的应用程序上下文非常理想。在这样的上下文中，bean可以使用应用服务器资源，比如JTA事务管理器和JNDI绑定的JDBC数据源实例以及JMS ConnectionFactory实例，
+还可以通过Spring标准事务管理以及JNDI和JMX支持工具向平台s的JMX服务器注册。应用程序组件还可以通过Spring的任务执行器抽象与应用服务器s JCA WorkManager交互。
+
+有关RAR部署中涉及的配置细节，请参阅SpringContextResourceAdapter类的javadoc。
+
+用于将Spring ApplicationContext作为Java EE RAR文件进行简单部署
+
+* 所有应用程序的类打包成一个RAR文件(这是一个标准的JAR文件与不同的文件扩展名)。阀门所有必需的库JAR RAR存档的根源。阀门一个meta - inf / ra.xml部署描述符(SpringContextResourceAdapter javadoc所示)和相应的Spring XML bean定义文件(s)(通常是meta - inf /中)。
+* 将生成的RAR文件放到应用服务器的部署目录中。
+
+> 这样的RAR部署单元通常是自包含的。它们不向外部世界公开组件，甚至不向同一应用程序的其他模块公开组件。与基于rra的ApplicationContext的交互通常是通过JMS目的地进行的，该JMS目的地与其他模块共享。
+> 例如，基于rar的ApplicationContext还可以调度一些作业或对文件系统中的新文件(或类似的东西)作出反应。如果它需要允许从外部进行同步访问，那么它可以(例如)导出RMI端点，
+> 这些端点可由同一台机器上的其他应用程序模块使用。
 
 
 

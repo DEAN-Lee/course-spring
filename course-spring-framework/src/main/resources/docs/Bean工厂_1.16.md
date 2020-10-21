@@ -1,0 +1,16 @@
+# Bean工厂
+BeanFactory API为Spring的IoC功能提供了底层基础。它的特定契约主要用于与Spring的其他部分和相关的第三方框架的集成，它的DefaultListableBeanFactory
+实现是高级别的GenericApplicationContext容器中的一个关键委托。
+
+BeanFactory和相关接口(如BeanFactoryAware、InitializingBean、DisposableBean)是其他框架组件的重要集成点。由于不需要任何注释甚至反射，
+它们允许容器与其组件之间进行非常有效的交互。应用程序级bean可能使用相同的回调接口，但通常更倾向于通过注释或编程配置进行声明性依赖注入。
+
+请注意，核心BeanFactory API级别及其DefaultListableBeanFactory实现没有对要使用的配置格式或任何组件注释进行假设。
+所有这些风格都通过扩展(比如XmlBeanDefinitionReader和AutowiredAnnotationBeanPostProcessor)实现，并在共享的BeanDefinition对象上进行操作，
+作为核心元数据表示。这就是使Spring的容器如此灵活和可扩展的本质所在。
+
+## BeanFactory or ApplicationContext?
+
+本节解释BeanFactory和ApplicationContext容器级别之间的差异，以及引导的含义。
+
+您应该使用ApplicationContext，除非您有很好的理由不这样做，使用GenericApplicationContext和它的子类AnnotationConfigApplicationContext作为自定义引导的通用实现。

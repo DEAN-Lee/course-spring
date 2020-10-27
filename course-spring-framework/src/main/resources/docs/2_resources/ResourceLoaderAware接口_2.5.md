@@ -1,0 +1,16 @@
+# ResourceLoaderAware接口
+ResourceLoaderAware接口是一个特殊的回调接口，它标识期望通过ResourceLoader引用提供的组件。下面的清单显示了ResourceLoaderAware接口的定义
+```java
+public interface ResourceLoaderAware {
+
+    void setResourceLoader(ResourceLoader resourceLoader);
+}
+```
+当一个类实现ResourceLoaderAware并被部署到应用程序上下文中(作为一个spring管理的bean)时，应用程序上下文中将它识别为ResourceLoaderAware。
+然后，应用程序上下文调用setResourceLoader(ResourceLoader)，将自己作为参数提供(记住，Spring中的所有应用程序上下文都实现ResourceLoader接口)。
+
+由于ApplicationContext是一个ResourceLoader，所以bean还可以实现ApplicationContext taware接口，并直接使用提供的应用程序上下文来加载资源。
+但是，一般来说，如果您只需要使用专门的ResourceLoader接口，那么使用它会更好。代码只会耦合到资源加载接口(可以认为是一个实用程序接口)，而不会耦合到整个Spring ApplicationContext接口。
+
+在应用程序组件中，你也可以依靠ResourceLoader的自动装配来实现ResourceLoaderAware接口。“传统的”构造函数和byType自动装配模式(如在自动装配协作器中所描述的)能够分别为构造函数参数或setter方法参数提供一个ResourceLoader。
+为了获得更大的灵活性(包括自动装配字段和多个参数方法的能力)，考虑使用基于注释的自动装配特性。在这种情况下，ResourceLoader被自动写入一个字段、构造函数参数或方法参数，这些参数期望ResourceLoader类型，只要相关的字段、构造函数或方法带有@Autowired注解。更多信息，请参见使用@Autowired。

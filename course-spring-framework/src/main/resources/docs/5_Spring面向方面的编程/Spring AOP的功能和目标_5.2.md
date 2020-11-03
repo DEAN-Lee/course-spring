@@ -1,0 +1,2 @@
+# Spring AOP的功能和目标
+Spring AOP是用纯Java实现的。不需要特殊的编译过程。Spring AOP不需要控制类加载器的层次结构，因此适合在servlet容器或应用服务器中使用。

@@ -1,0 +1,5 @@
+# @AspectJ支持
+@AspectJ引用了一种将方面声明为带有注释的常规Java类的样式。@AspectJ样式是由AspectJ项目作为AspectJ 5发行版的一部分引入的。
+Spring使用AspectJ提供的用于切入点解析和匹配的库来解释与AspectJ 5相同的注释。然而，AOP运行时仍然是纯粹的Spring AOP，并且不依赖于AspectJ编译器或weaver。
+
+> 使用AspectJ编译器和weaver可以使用完整的AspectJ语言，在与Spring应用程序一起使用AspectJ中对此进行了讨论。

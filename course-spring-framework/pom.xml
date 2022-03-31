@@ -11,7 +11,7 @@
 
     <artifactId>course-spring-framework</artifactId>
     <properties>
-        <spring.version>5.2.6.RELEASE</spring.version>
+        <spring.version>5.3.18</spring.version>
     </properties>
 
     <dependencies>
